@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign Service Report</title>
+<style>
+  :root { --navy: #3183A1; --bg: #F5F6F8; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: #1a1a1a;
+  }
+  .header {
+    background: var(--navy);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+  }
+  .label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  canvas {
+    width: 100%;
+    height: 220px;
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 12px;
+    touch-action: none;
+    display: block;
+  }
+  .hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  button {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #clearBtn {
+    background: white;
+    color: #333;
+    border: 1px solid #ccc;
+  }
+  #submitBtn {
+    background: var(--navy);
+    color: white;
+  }
+  #submitBtn:disabled {
+    opacity: 0.5;
+  }
+  #status {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 15px;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="header">Service Report Sign-Off</div>
+  <div class="container">
+    <div id="formView">
+      <div class="card">
+        <div class="label" id="jobLabel">Job</div>
+        <div style="font-size:13px;color:#666;">
+          Please review the completed work with the engineer, then sign below to confirm.
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Your Signature</div>
+        <canvas id="pad"></canvas>
+        <div class="hint">Sign above using your finger or mouse</div>
+        <div class="row">
+          <button id="clearBtn" type="button">Clear</button>
+          <button id="submitBtn" type="button">Submit Signature</button>
+        </div>
+      </div>
+    </div>
+    <div id="statusView" class="hidden">
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    // ---- CONFIGURE THIS ----
+    // Paste the "Receive & Store Signature" Power Automate HTTP POST URL here.
+    const RECEIVE_SIGNATURE_URL = "https://YOUR-POWER-AUTOMATE-RECEIVE-SIGNATURE-URL";
+    // -------------------------
+
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("job") || "";
+    const jobTitle = params.get("title") || "your job";
+    document.getElementById("jobLabel").textContent = "Job: " + decodeURIComponent(jobTitle);
+
+    const canvas = document.getElementById("pad");
+    const ctx = canvas.getContext("2d");
+    let drawing = false;
+    let hasStrokes = false;
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#3183A1";
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function pos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const point = e.touches ? e.touches[0] : e;
+      return { x: point.clientX - rect.left, y: point.clientY - rect.top };
+    }
+
+    function start(e) {
+      e.preventDefault();
+      drawing = true;
+      hasStrokes = true;
+      const p = pos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+    function move(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const p = pos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+    function end() { drawing = false; }
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end);
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasStrokes = false;
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      if (!hasStrokes) {
+        alert("Please sign before submitting.");
+        return;
+      }
+      if (RECEIVE_SIGNATURE_URL.includes("YOUR-POWER-AUTOMATE")) {
+        alert("This signing page isn't configured yet. Please contact the office.");
+        return;
+      }
+
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+
+      const signatureBase64 = canvas.toDataURL("image/png").split(",")[1];
+
+      try {
+        const res = await fetch(RECEIVE_SIGNATURE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jobId: jobId,
+            signatureBase64: signatureBase64,
+            signedAt: new Date().toISOString(),
+          }),
+        });
+
+        if (res.ok) {
+          showStatus("Thank you — your signature has been recorded.");
+        } else {
+          showStatus("Something went wrong (status " + res.status + "). Please contact the office.");
+        }
+      } catch (err) {
+        showStatus("Couldn't submit your signature. Please check your connection and try again.");
+        btn.disabled = false;
+        btn.textContent = "Submit Signature";
+      }
+    });
+
+    function showStatus(message) {
+      document.getElementById("formView").classList.add("hidden");
+      document.getElementById("statusView").classList.remove("hidden");
+      document.getElementById("status").textContent = message;
+    }
+
+    if (!jobId) {
+      showStatus("This signing link is missing job information. Please contact the office.");
+    }
+  </script>
+</body>
+</html>
