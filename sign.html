@@ -53,11 +53,6 @@
     color: #888;
     margin-top: 8px;
   }
-  .th {
-    font-size: 12px;
-    color: #999;
-    margin-top: 4px;
-  }
   .row {
     display: flex;
     gap: 10px;
@@ -90,123 +85,26 @@
     font-size: 15px;
   }
   .hidden { display: none; }
-  .stars {
-    display: flex;
-    gap: 6px;
-    font-size: 34px;
-    line-height: 1;
-    margin-top: 4px;
-  }
-  .stars span {
-    cursor: pointer;
-    color: #ddd;
-    transition: color 0.15s;
-    user-select: none;
-  }
-  .stars span.filled {
-    color: #f5a623;
-  }
-  textarea {
-    width: 100%;
-    min-height: 90px;
-    border: 1.5px solid #ddd;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-  }
-  textarea:focus {
-    outline: none;
-    border-color: var(--navy);
-  }
-  .charcount {
-    font-size: 11px;
-    color: #999;
-    text-align: right;
-    margin-top: 4px;
-  }
-  .charcount.ok { color: #2e7d32; }
-  .suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .chip {
-    background: #eef4f7;
-    color: var(--navy);
-    border: 1px solid #d8e6ec;
-    border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 12.5px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .chip:hover {
-    background: #e0edf3;
-  }
 </style>
 </head>
 <body>
-  <div class="header">
-    Service Report Sign-Off
-    <div style="font-size:13px;font-weight:500;opacity:0.85;margin-top:2px;">ยืนยันการลงนามใบรายงานบริการ</div>
-  </div>
+  <div class="header">Service Report Sign-Off</div>
   <div class="container">
     <div id="formView">
       <div class="card">
         <div class="label" id="jobLabel">Job</div>
         <div style="font-size:13px;color:#666;">
-          Please review the work completed by our engineer, then sign below to confirm you're satisfied with the service.
-        </div>
-        <div class="th">กรุณาตรวจสอบงานที่ช่างเทคนิคของเราดำเนินการเสร็จแล้ว จากนั้นลงลายมือชื่อด้านล่างเพื่อยืนยันว่าท่านพึงพอใจกับบริการ</div>
-      </div>
-      <div class="card">
-        <div class="label">Rate the Service</div>
-        <div style="font-size:11px;color:#999;margin-bottom:2px;">ให้คะแนนบริการของเรา</div>
-        <div class="stars" id="stars">
-          <span data-value="1">★</span>
-          <span data-value="2">★</span>
-          <span data-value="3">★</span>
-          <span data-value="4">★</span>
-          <span data-value="5">★</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="label">Comments</div>
-        <div style="font-size:11px;color:#999;margin-bottom:6px;">ความคิดเห็น</div>
-        <textarea id="comment" placeholder="Tell us about the service (at least 10 characters)... / บอกเราเกี่ยวกับบริการ (อย่างน้อย 10 ตัวอักษร)"></textarea>
-        <div class="charcount" id="charcount">0 / 10 characters minimum</div>
-        <div class="suggestions" id="suggestions">
-          <span class="chip" data-word="ยอดเยี่ยม">ยอดเยี่ยม</span>
-          <span class="chip" data-word="มืออาชีพ">มืออาชีพ</span>
-          <span class="chip" data-word="รวดเร็ว">รวดเร็ว</span>
-          <span class="chip" data-word="เป็นมิตร">เป็นมิตร</span>
-          <span class="chip" data-word="ประทับใจ">ประทับใจ</span>
-          <span class="chip" data-word="ตรงเวลา">ตรงเวลา</span>
-          <span class="chip" data-word="สะอาดเรียบร้อย">สะอาดเรียบร้อย</span>
-          <span class="chip" data-word="Excellent">Excellent</span>
-          <span class="chip" data-word="Professional">Professional</span>
-          <span class="chip" data-word="Efficient">Efficient</span>
-          <span class="chip" data-word="Friendly">Friendly</span>
-          <span class="chip" data-word="Helpful">Helpful</span>
-          <span class="chip" data-word="On time">On time</span>
-          <span class="chip" data-word="Thorough">Thorough</span>
+          Please review the completed work with the engineer, then sign below to confirm.
         </div>
       </div>
       <div class="card">
         <div class="label">Your Signature</div>
-        <div style="font-size:11px;color:#999;margin-bottom:6px;">ลายมือชื่อของคุณ</div>
         <canvas id="pad"></canvas>
         <div class="hint">Sign above using your finger or mouse</div>
-        <div class="th">เซ็นชื่อด้านบนโดยใช้นิ้วหรือเมาส์ของคุณ</div>
         <div class="row">
-          <button id="clearBtn" type="button">Clear · ล้าง</button>
+          <button id="clearBtn" type="button">Clear</button>
+          <button id="submitBtn" type="button">Submit Signature</button>
         </div>
-      </div>
-      <div class="row">
-        <button id="submitBtn" type="button" style="flex:1;">Submit Signature · ส่งลายมือชื่อ</button>
       </div>
     </div>
     <div id="statusView" class="hidden">
@@ -217,13 +115,13 @@
   <script>
     // ---- CONFIGURE THIS ----
     // Paste the "Receive & Store Signature" Power Automate HTTP POST URL here.
-    const RECEIVE_SIGNATURE_URL = "https://YOUR-POWER-AUTOMATE-RECEIVE-SIGNATURE-URL";
+    const RECEIVE_SIGNATURE_URL = "https://default350cc912562e4158a613b07b01b708.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/06/workflows/ddb2af11b61f4a9b9122a7b610f8de03/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jOlj-LZdH0jwckg2PyfSaoMDSp7R9j7qYlNsrVLhd74";
     // -------------------------
 
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get("job") || "";
     const jobTitle = params.get("title") || "your job";
-    document.getElementById("jobLabel").textContent = "Job / งาน: " + decodeURIComponent(jobTitle);
+    document.getElementById("jobLabel").textContent = "Job: " + decodeURIComponent(jobTitle);
 
     const canvas = document.getElementById("pad");
     const ctx = canvas.getContext("2d");
@@ -278,71 +176,19 @@
       hasStrokes = false;
     });
 
-    // ---- Star rating ----
-    let rating = 0;
-    const starEls = document.querySelectorAll("#stars span");
-    starEls.forEach((star) => {
-      star.addEventListener("click", () => {
-        rating = parseInt(star.getAttribute("data-value"), 10);
-        starEls.forEach((s) => {
-          s.classList.toggle("filled", parseInt(s.getAttribute("data-value"), 10) <= rating);
-        });
-      });
-    });
-
-    // ---- Comment box + character count ----
-    const commentEl = document.getElementById("comment");
-    const charcountEl = document.getElementById("charcount");
-    const MIN_COMMENT_LENGTH = 10;
-
-    function updateCharCount() {
-      const len = commentEl.value.trim().length;
-      const ok = len >= MIN_COMMENT_LENGTH;
-      charcountEl.textContent = ok
-        ? len + " characters · " + len + " ตัวอักษร"
-        : len + " / " + MIN_COMMENT_LENGTH + " characters minimum · อย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร";
-      charcountEl.classList.toggle("ok", ok);
-    }
-    commentEl.addEventListener("input", updateCharCount);
-    updateCharCount();
-
-    // ---- Suggestion chips: click to insert word into comment box ----
-    document.querySelectorAll(".chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        const word = chip.getAttribute("data-word");
-        const current = commentEl.value.trim();
-        commentEl.value = current ? current + " " + word : word;
-        updateCharCount();
-        commentEl.focus();
-      });
-    });
-
     document.getElementById("submitBtn").addEventListener("click", async () => {
       if (!hasStrokes) {
-        alert("Please sign before submitting.\nกรุณาเซ็นชื่อก่อนส่งข้อมูล");
-        return;
-      }
-      if (rating < 1 || rating > 5) {
-        alert("Please select a star rating.\nกรุณาเลือกคะแนนดาว");
-        return;
-      }
-      const commentText = commentEl.value.trim();
-      if (commentText.length < MIN_COMMENT_LENGTH) {
-        alert(
-          "Please enter a comment of at least " + MIN_COMMENT_LENGTH + " characters." +
-          "\nกรุณากรอกความคิดเห็นอย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร"
-        );
-        commentEl.focus();
+        alert("Please sign before submitting.");
         return;
       }
       if (RECEIVE_SIGNATURE_URL.includes("YOUR-POWER-AUTOMATE")) {
-        alert("This signing page isn't configured yet. Please contact the office.\nหน้าลงนามนี้ยังไม่ได้ตั้งค่า กรุณาติดต่อสำนักงาน");
+        alert("This signing page isn't configured yet. Please contact the office.");
         return;
       }
 
       const btn = document.getElementById("submitBtn");
       btn.disabled = true;
-      btn.textContent = "Submitting... · กำลังส่ง...";
+      btn.textContent = "Submitting...";
 
       const signatureBase64 = canvas.toDataURL("image/png").split(",")[1];
 
@@ -354,44 +200,29 @@
             jobId: jobId,
             signatureBase64: signatureBase64,
             signedAt: new Date().toISOString(),
-            rating: rating,
-            comment: commentText,
           }),
         });
 
         if (res.ok) {
-          showStatus(
-            "Thank you — your signature has been recorded.",
-            "ขอบคุณค่ะ/ครับ — ลายมือชื่อของคุณได้รับการบันทึกเรียบร้อยแล้ว"
-          );
+          showStatus("Thank you — your signature has been recorded.");
         } else {
-          showStatus(
-            "Something went wrong (status " + res.status + "). Please contact the office.",
-            "เกิดข้อผิดพลาด (รหัสสถานะ " + res.status + ") กรุณาติดต่อสำนักงาน"
-          );
+          showStatus("Something went wrong (status " + res.status + "). Please contact the office.");
         }
       } catch (err) {
-        showStatus(
-          "Couldn't submit your signature. Please check your connection and try again.",
-          "ไม่สามารถส่งลายมือชื่อได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง"
-        );
+        showStatus("Couldn't submit your signature. Please check your connection and try again.");
         btn.disabled = false;
-        btn.textContent = "Submit Signature · ส่งลายมือชื่อ";
+        btn.textContent = "Submit Signature";
       }
     });
 
-    function showStatus(message, messageTh) {
+    function showStatus(message) {
       document.getElementById("formView").classList.add("hidden");
       document.getElementById("statusView").classList.remove("hidden");
-      document.getElementById("status").innerHTML =
-        message + (messageTh ? '<div class="th" style="margin-top:8px;font-size:13px;">' + messageTh + '</div>' : "");
+      document.getElementById("status").textContent = message;
     }
 
     if (!jobId) {
-      showStatus(
-        "This signing link is missing job information. Please contact the office.",
-        "ลิงก์ลงนามนี้ขาดข้อมูลงาน กรุณาติดต่อสำนักงาน"
-      );
+      showStatus("This signing link is missing job information. Please contact the office.");
     }
   </script>
 </body>
