@@ -90,6 +90,62 @@
     font-size: 15px;
   }
   .hidden { display: none; }
+  .stars {
+    display: flex;
+    gap: 6px;
+    font-size: 34px;
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .stars span {
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.15s;
+    user-select: none;
+  }
+  .stars span.filled {
+    color: #f5a623;
+  }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1.5px solid #ddd;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+  }
+  .charcount {
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+    margin-top: 4px;
+  }
+  .charcount.ok { color: #2e7d32; }
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .chip {
+    background: #eef4f7;
+    color: var(--navy);
+    border: 1px solid #d8e6ec;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .chip:hover {
+    background: #e0edf3;
+  }
 </style>
 </head>
 <body>
@@ -107,6 +163,39 @@
         <div class="th">กรุณาตรวจสอบงานที่ช่างเทคนิคของเราดำเนินการเสร็จแล้ว จากนั้นลงลายมือชื่อด้านล่างเพื่อยืนยันว่าท่านพึงพอใจกับบริการ</div>
       </div>
       <div class="card">
+        <div class="label">Rate the Service</div>
+        <div style="font-size:11px;color:#999;margin-bottom:2px;">ให้คะแนนบริการของเรา</div>
+        <div class="stars" id="stars">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Comments</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;">ความคิดเห็น</div>
+        <textarea id="comment" placeholder="Tell us about the service (at least 10 characters)... / บอกเราเกี่ยวกับบริการ (อย่างน้อย 10 ตัวอักษร)"></textarea>
+        <div class="charcount" id="charcount">0 / 10 characters minimum</div>
+        <div class="suggestions" id="suggestions">
+          <span class="chip" data-word="ยอดเยี่ยม">ยอดเยี่ยม</span>
+          <span class="chip" data-word="มืออาชีพ">มืออาชีพ</span>
+          <span class="chip" data-word="รวดเร็ว">รวดเร็ว</span>
+          <span class="chip" data-word="เป็นมิตร">เป็นมิตร</span>
+          <span class="chip" data-word="ประทับใจ">ประทับใจ</span>
+          <span class="chip" data-word="ตรงเวลา">ตรงเวลา</span>
+          <span class="chip" data-word="สะอาดเรียบร้อย">สะอาดเรียบร้อย</span>
+          <span class="chip" data-word="Excellent">Excellent</span>
+          <span class="chip" data-word="Professional">Professional</span>
+          <span class="chip" data-word="Efficient">Efficient</span>
+          <span class="chip" data-word="Friendly">Friendly</span>
+          <span class="chip" data-word="Helpful">Helpful</span>
+          <span class="chip" data-word="On time">On time</span>
+          <span class="chip" data-word="Thorough">Thorough</span>
+        </div>
+      </div>
+      <div class="card">
         <div class="label">Your Signature</div>
         <div style="font-size:11px;color:#999;margin-bottom:6px;">ลายมือชื่อของคุณ</div>
         <canvas id="pad"></canvas>
@@ -114,8 +203,10 @@
         <div class="th">เซ็นชื่อด้านบนโดยใช้นิ้วหรือเมาส์ของคุณ</div>
         <div class="row">
           <button id="clearBtn" type="button">Clear · ล้าง</button>
-          <button id="submitBtn" type="button">Submit Signature · ส่งลายมือชื่อ</button>
         </div>
+      </div>
+      <div class="row">
+        <button id="submitBtn" type="button" style="flex:1;">Submit Signature · ส่งลายมือชื่อ</button>
       </div>
     </div>
     <div id="statusView" class="hidden">
@@ -187,9 +278,61 @@
       hasStrokes = false;
     });
 
+    // ---- Star rating ----
+    let rating = 0;
+    const starEls = document.querySelectorAll("#stars span");
+    starEls.forEach((star) => {
+      star.addEventListener("click", () => {
+        rating = parseInt(star.getAttribute("data-value"), 10);
+        starEls.forEach((s) => {
+          s.classList.toggle("filled", parseInt(s.getAttribute("data-value"), 10) <= rating);
+        });
+      });
+    });
+
+    // ---- Comment box + character count ----
+    const commentEl = document.getElementById("comment");
+    const charcountEl = document.getElementById("charcount");
+    const MIN_COMMENT_LENGTH = 10;
+
+    function updateCharCount() {
+      const len = commentEl.value.trim().length;
+      const ok = len >= MIN_COMMENT_LENGTH;
+      charcountEl.textContent = ok
+        ? len + " characters · " + len + " ตัวอักษร"
+        : len + " / " + MIN_COMMENT_LENGTH + " characters minimum · อย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร";
+      charcountEl.classList.toggle("ok", ok);
+    }
+    commentEl.addEventListener("input", updateCharCount);
+    updateCharCount();
+
+    // ---- Suggestion chips: click to insert word into comment box ----
+    document.querySelectorAll(".chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const word = chip.getAttribute("data-word");
+        const current = commentEl.value.trim();
+        commentEl.value = current ? current + " " + word : word;
+        updateCharCount();
+        commentEl.focus();
+      });
+    });
+
     document.getElementById("submitBtn").addEventListener("click", async () => {
       if (!hasStrokes) {
         alert("Please sign before submitting.\nกรุณาเซ็นชื่อก่อนส่งข้อมูล");
+        return;
+      }
+      if (rating < 1 || rating > 5) {
+        alert("Please select a star rating.\nกรุณาเลือกคะแนนดาว");
+        return;
+      }
+      const commentText = commentEl.value.trim();
+      if (commentText.length < MIN_COMMENT_LENGTH) {
+        alert(
+          "Please enter a comment of at least " + MIN_COMMENT_LENGTH + " characters." +
+          "\nกรุณากรอกความคิดเห็นอย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร"
+        );
+        commentEl.focus();
         return;
       }
       if (RECEIVE_SIGNATURE_URL.includes("YOUR-POWER-AUTOMATE")) {
@@ -211,6 +354,8 @@
             jobId: jobId,
             signatureBase64: signatureBase64,
             signedAt: new Date().toISOString(),
+            rating: rating,
+            comment: commentText,
           }),
         });
 
