@@ -179,16 +179,20 @@
         <textarea id="comment" placeholder="Tell us about the service (at least 10 characters)... / บอกเราเกี่ยวกับบริการ (อย่างน้อย 10 ตัวอักษร)"></textarea>
         <div class="charcount" id="charcount">0 / 10 characters minimum</div>
         <div class="suggestions" id="suggestions">
-         <span class="chip" data-word="ยอดเยี่ยม">ยอดเยี่ยม</span>
+          <span class="chip" data-word="ยอดเยี่ยม">ยอดเยี่ยม</span>
           <span class="chip" data-word="มืออาชีพ">มืออาชีพ</span>
           <span class="chip" data-word="รวดเร็ว">รวดเร็ว</span>
+          <span class="chip" data-word="เป็นมิตร">เป็นมิตร</span>
+          <span class="chip" data-word="ประทับใจ">ประทับใจ</span>
           <span class="chip" data-word="ตรงเวลา">ตรงเวลา</span>
           <span class="chip" data-word="สะอาดเรียบร้อย">สะอาดเรียบร้อย</span>
           <span class="chip" data-word="Excellent">Excellent</span>
           <span class="chip" data-word="Professional">Professional</span>
           <span class="chip" data-word="Efficient">Efficient</span>
-          <span class="chip" data-word="Friendly">Bad Experience</span>
+          <span class="chip" data-word="Friendly">Friendly</span>
+          <span class="chip" data-word="Helpful">Helpful</span>
           <span class="chip" data-word="On time">On time</span>
+          <span class="chip" data-word="Thorough">Thorough</span>
         </div>
       </div>
       <div class="card">
@@ -212,8 +216,9 @@
 
   <script>
     // ---- CONFIGURE THIS ----
-    // Paste the "Receive & Store Signature" Power Automate HTTP POST URL here.
-    const RECEIVE_SIGNATURE_URL = "https://default350cc912562e4158a613b07b01b708.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/06/workflows/ddb2af11b61f4a9b9122a7b610f8de03/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jOlj-LZdH0jwckg2PyfSaoMDSp7R9j7qYlNsrVLhd74";
+    // Paste your deployed backend's /receive-signature URL here
+    // (see servicepro-sharepoint-backend/README.md).
+    const RECEIVE_SIGNATURE_URL = "https://YOUR-BACKEND-URL/receive-signature";
     // -------------------------
 
     const params = new URLSearchParams(window.location.search);
@@ -331,7 +336,7 @@
         commentEl.focus();
         return;
       }
-      if (RECEIVE_SIGNATURE_URL.includes("YOUR-POWER-AUTOMATE")) {
+      if (RECEIVE_SIGNATURE_URL.includes("YOUR-BACKEND-URL")) {
         alert("This signing page isn't configured yet. Please contact the office.\nหน้าลงนามนี้ยังไม่ได้ตั้งค่า กรุณาติดต่อสำนักงาน");
         return;
       }
