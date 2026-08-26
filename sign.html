@@ -206,7 +206,9 @@
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get("job") || "";
     const jobTitle = params.get("title") || "your job";
-    document.getElementById("jobLabel").textContent = "Job: " + decodeURIComponent(jobTitle);
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    document.getElementById("jobLabel").textContent = "Project: Kansi — " + formattedDate;
 
     const canvas = document.getElementById("pad");
     const ctx = canvas.getContext("2d");
