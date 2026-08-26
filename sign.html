@@ -53,11 +53,6 @@
     color: #888;
     margin-top: 8px;
   }
-  .th {
-    font-size: 12px;
-    color: #999;
-    margin-top: 4px;
-  }
   .row {
     display: flex;
     gap: 10px;
@@ -151,7 +146,6 @@
 <body>
   <div class="header">
     Service Report Sign-Off
-    <div style="font-size:13px;font-weight:500;opacity:0.85;margin-top:2px;">ยืนยันการลงนามใบรายงานบริการ</div>
   </div>
   <div class="container">
     <div id="formView">
@@ -160,11 +154,9 @@
         <div style="font-size:13px;color:#666;">
           Please review the work completed by our engineer, then sign below to confirm you're satisfied with the service.
         </div>
-        <div class="th">กรุณาตรวจสอบงานที่ช่างเทคนิคของเราดำเนินการเสร็จแล้ว จากนั้นลงลายมือชื่อด้านล่างเพื่อยืนยันว่าท่านพึงพอใจกับบริการ</div>
       </div>
       <div class="card">
         <div class="label">Rate the Service</div>
-        <div style="font-size:11px;color:#999;margin-bottom:2px;">ให้คะแนนบริการของเรา</div>
         <div class="stars" id="stars">
           <span data-value="1">★</span>
           <span data-value="2">★</span>
@@ -175,17 +167,9 @@
       </div>
       <div class="card">
         <div class="label">Comments</div>
-        <div style="font-size:11px;color:#999;margin-bottom:6px;">ความคิดเห็น</div>
-        <textarea id="comment" placeholder="Tell us about the service (at least 10 characters)... / บอกเราเกี่ยวกับบริการ (อย่างน้อย 10 ตัวอักษร)"></textarea>
+        <textarea id="comment" placeholder="Tell us about the service (at least 10 characters)..."></textarea>
         <div class="charcount" id="charcount">0 / 10 characters minimum</div>
         <div class="suggestions" id="suggestions">
-          <span class="chip" data-word="ยอดเยี่ยม">ยอดเยี่ยม</span>
-          <span class="chip" data-word="มืออาชีพ">มืออาชีพ</span>
-          <span class="chip" data-word="รวดเร็ว">รวดเร็ว</span>
-          <span class="chip" data-word="เป็นมิตร">เป็นมิตร</span>
-          <span class="chip" data-word="ประทับใจ">ประทับใจ</span>
-          <span class="chip" data-word="ตรงเวลา">ตรงเวลา</span>
-          <span class="chip" data-word="สะอาดเรียบร้อย">สะอาดเรียบร้อย</span>
           <span class="chip" data-word="Excellent">Excellent</span>
           <span class="chip" data-word="Professional">Professional</span>
           <span class="chip" data-word="Efficient">Efficient</span>
@@ -197,16 +181,14 @@
       </div>
       <div class="card">
         <div class="label">Your Signature</div>
-        <div style="font-size:11px;color:#999;margin-bottom:6px;">ลายมือชื่อของคุณ</div>
         <canvas id="pad"></canvas>
         <div class="hint">Sign above using your finger or mouse</div>
-        <div class="th">เซ็นชื่อด้านบนโดยใช้นิ้วหรือเมาส์ของคุณ</div>
         <div class="row">
-          <button id="clearBtn" type="button">Clear · ล้าง</button>
+          <button id="clearBtn" type="button">Clear</button>
         </div>
       </div>
       <div class="row">
-        <button id="submitBtn" type="button" style="flex:1;">Submit Signature · ส่งลายมือชื่อ</button>
+        <button id="submitBtn" type="button" style="flex:1;">Submit Signature</button>
       </div>
     </div>
     <div id="statusView" class="hidden">
@@ -224,7 +206,7 @@
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get("job") || "";
     const jobTitle = params.get("title") || "your job";
-    document.getElementById("jobLabel").textContent = "Job / งาน: " + decodeURIComponent(jobTitle);
+    document.getElementById("jobLabel").textContent = "Job: " + decodeURIComponent(jobTitle);
 
     const canvas = document.getElementById("pad");
     const ctx = canvas.getContext("2d");
@@ -300,8 +282,8 @@
       const len = commentEl.value.trim().length;
       const ok = len >= MIN_COMMENT_LENGTH;
       charcountEl.textContent = ok
-        ? len + " characters · " + len + " ตัวอักษร"
-        : len + " / " + MIN_COMMENT_LENGTH + " characters minimum · อย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร";
+        ? len + " characters"
+        : len + " / " + MIN_COMMENT_LENGTH + " characters minimum";
       charcountEl.classList.toggle("ok", ok);
     }
     commentEl.addEventListener("input", updateCharCount);
@@ -320,30 +302,27 @@
 
     document.getElementById("submitBtn").addEventListener("click", async () => {
       if (!hasStrokes) {
-        alert("Please sign before submitting.\nกรุณาเซ็นชื่อก่อนส่งข้อมูล");
+        alert("Please sign before submitting.");
         return;
       }
       if (rating < 1 || rating > 5) {
-        alert("Please select a star rating.\nกรุณาเลือกคะแนนดาว");
+        alert("Please select a star rating.");
         return;
       }
       const commentText = commentEl.value.trim();
       if (commentText.length < MIN_COMMENT_LENGTH) {
-        alert(
-          "Please enter a comment of at least " + MIN_COMMENT_LENGTH + " characters." +
-          "\nกรุณากรอกความคิดเห็นอย่างน้อย " + MIN_COMMENT_LENGTH + " ตัวอักษร"
-        );
+        alert("Please enter a comment of at least " + MIN_COMMENT_LENGTH + " characters.");
         commentEl.focus();
         return;
       }
       if (RECEIVE_SIGNATURE_URL.includes("YOUR-BACKEND-URL")) {
-        alert("This signing page isn't configured yet. Please contact the office.\nหน้าลงนามนี้ยังไม่ได้ตั้งค่า กรุณาติดต่อสำนักงาน");
+        alert("This signing page isn't configured yet. Please contact the office.");
         return;
       }
 
       const btn = document.getElementById("submitBtn");
       btn.disabled = true;
-      btn.textContent = "Submitting... · กำลังส่ง...";
+      btn.textContent = "Submitting...";
 
       const signatureBase64 = canvas.toDataURL("image/png").split(",")[1];
 
@@ -361,38 +340,25 @@
         });
 
         if (res.ok) {
-          showStatus(
-            "Thank you — your signature has been recorded.",
-            "ขอบคุณค่ะ/ครับ — ลายมือชื่อของคุณได้รับการบันทึกเรียบร้อยแล้ว"
-          );
+          showStatus("Thank you — your signature has been recorded.");
         } else {
-          showStatus(
-            "Something went wrong (status " + res.status + "). Please contact the office.",
-            "เกิดข้อผิดพลาด (รหัสสถานะ " + res.status + ") กรุณาติดต่อสำนักงาน"
-          );
+          showStatus("Something went wrong (status " + res.status + "). Please contact the office.");
         }
       } catch (err) {
-        showStatus(
-          "Couldn't submit your signature. Please check your connection and try again.",
-          "ไม่สามารถส่งลายมือชื่อได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง"
-        );
+        showStatus("Couldn't submit your signature. Please check your connection and try again.");
         btn.disabled = false;
-        btn.textContent = "Submit Signature · ส่งลายมือชื่อ";
+        btn.textContent = "Submit Signature";
       }
     });
 
-    function showStatus(message, messageTh) {
+    function showStatus(message) {
       document.getElementById("formView").classList.add("hidden");
       document.getElementById("statusView").classList.remove("hidden");
-      document.getElementById("status").innerHTML =
-        message + (messageTh ? '<div class="th" style="margin-top:8px;font-size:13px;">' + messageTh + '</div>' : "");
+      document.getElementById("status").textContent = message;
     }
 
     if (!jobId) {
-      showStatus(
-        "This signing link is missing job information. Please contact the office.",
-        "ลิงก์ลงนามนี้ขาดข้อมูลงาน กรุณาติดต่อสำนักงาน"
-      );
+      showStatus("This signing link is missing job information. Please contact the office.");
     }
   </script>
 </body>
